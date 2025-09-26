@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import { App } from './App.tsx'
 import styles from './style.css?inline'
 import styles2 from 'sonner/dist/styles.css?inline'
 import { addStyle } from '@/lib/addStyle.ts'
