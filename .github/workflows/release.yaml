@@ -1,12 +1,12 @@
 env:
-  DIRECTORY: .output
+  DIRECTORY: .
   PROJECT_NAME: browser-extension-template
 
 name: Release
 
 on:
   push:
-    branches: ['main']
+    branches: [main]
     paths:
       - 'package.json'
 
@@ -24,21 +24,20 @@ jobs:
         id: version
         uses: rxliuli/version-check@v1
         with:
-          file: ./package.json
+          file: ${{ env.DIRECTORY }}/package.json
 
   release:
     permissions:
       contents: write
     needs: version
-    if: ${{ needs.version.outputs.changed == 'true' }}
+    if: needs.version.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
           version: 'latest'
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'pnpm'
@@ -46,8 +45,9 @@ jobs:
         run: pnpm install
       - name: Zip extensions
         run: |
-          pnpm run zip
-          pnpm run zip:firefox
+          cd ${{ env.DIRECTORY }}
+          pnpm zip
+          pnpm zip:firefox
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -57,6 +57,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ${{ env.DIRECTORY }}/${{env.PROJECT_NAME}}-${{ needs.version.outputs.version }}-chrome.zip
-            ${{ env.DIRECTORY }}/${{env.PROJECT_NAME}}-${{ needs.version.outputs.version }}-firefox.zip
-            ${{ env.DIRECTORY }}/${{env.PROJECT_NAME}}-${{ needs.version.outputs.version }}-sources.zip
+            ${{ env.DIRECTORY }}/.output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-chrome.zip
+            ${{ env.DIRECTORY }}/.output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-firefox.zip
+            ${{ env.DIRECTORY }}/.output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-sources.zip
