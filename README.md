@@ -26,6 +26,7 @@ pnpm dev
 ```
 
 After running the development server:
+
 1. Navigate to the `*.output/chrome-mv3-dev` directory to find the compiled extension files
 2. Open `chrome://extensions` in Chrome
 3. Enable "Developer mode"
@@ -45,9 +46,9 @@ pnpm zip && pnpm zip:firefox
 
 Safari extension requires macOS environment and Xcode for building and publishing.
 
-#### Build Steps:
+#### Build Steps
 
-1. Create a `.env.local` file and add your `DEVELOPMENT_TEAM` ID
+1. Update `developmentTeam` in `wxt.config.ts` with your Apple Developer Team ID
 2. Run `pnpm build:safari` - this will automatically build and open Xcode
 3. Build the project in Xcode and test in Safari
 4. To publish: In Xcode, select **Product → Archive** to submit to the App Store
