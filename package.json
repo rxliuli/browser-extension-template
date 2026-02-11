@@ -44,7 +44,6 @@
     "is-ci": "^4.1.0",
     "playwright": "^1.58.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
     "vite-node": "^5.3.0",
     "vite-tsconfig-paths": "^6.0.5",
     "vitest": "^4.0.18",
@@ -52,6 +51,11 @@
     "wxt": "^0.20.13",
     "wxt-module-safari-xcode": "^0.1.0",
     "zx": "^8.8.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "npm:rolldown-vite@latest"
+    }
   },
   "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b"
 }
