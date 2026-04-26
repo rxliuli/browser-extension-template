@@ -9,11 +9,9 @@ export default defineConfig({
     developmentTeam: 'N2X78TUUFG',
   },
   vite: () => ({
-    plugins: [tailwindcss()] as any,
+    plugins: [tailwindcss()],
     resolve: {
-      alias: {
-        '@': __dirname,
-      },
+      tsconfigPaths: true,
     },
   }),
   manifestVersion: 3,
@@ -44,7 +42,6 @@ export default defineConfig({
           id:
             manifest.name!.toLowerCase().replaceAll(/[^a-z0-9]/g, '-') +
             '@rxliuli.com',
-          // @ts-expect-error https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings#data_collection_permissions
           data_collection_permissions: {
             required: ['none'],
           },
