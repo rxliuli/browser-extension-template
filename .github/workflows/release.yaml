@@ -52,9 +52,82 @@ jobs:
         with:
           tag_name: 'v${{ needs.version.outputs.version }}'
           name: 'v${{ needs.version.outputs.version }}'
+          generate_release_notes: true
           draft: false
           prerelease: false
           files: |
             ${{ env.DIRECTORY }}/.output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-chrome.zip
             ${{ env.DIRECTORY }}/.output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-firefox.zip
             ${{ env.DIRECTORY }}/.output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-sources.zip
+
+      # - name: Submit to Chrome Web Store
+      #   continue-on-error: true
+      #   run: |
+      #     cd ${{ env.DIRECTORY }}
+      #     pnpm wxt submit \
+      #       --chrome-zip .output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-chrome.zip
+      #   env:
+      #     CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      #     CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      #     CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      #     CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+      # - name: Submit to Firefox AMO
+      #   continue-on-error: true
+      #   run: |
+      #     cd ${{ env.DIRECTORY }}
+      #     pnpm wxt submit \
+      #       --firefox-zip .output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-firefox.zip \
+      #       --firefox-sources-zip .output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-sources.zip
+      #   env:
+      #     FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+      #     FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+      #     FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+
+      # - name: Submit to Edge Add-ons
+      #   continue-on-error: true
+      #   run: |
+      #     cd ${{ env.DIRECTORY }}
+      #     pnpm wxt submit \
+      #       --edge-zip .output/${{ env.PROJECT_NAME }}-${{ needs.version.outputs.version }}-chrome.zip
+      #   env:
+      #     EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+      #     EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+      #     EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+
+  # safari:
+  #   needs: version
+  #   if: needs.version.outputs.changed == 'true'
+  #   runs-on: macos-26
+  #   continue-on-error: true
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: pnpm/action-setup@v6
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 24
+  #         cache: 'pnpm'
+  #     - name: Install dependencies
+  #       run: pnpm install
+  #
+  #     - name: Build Safari extension
+  #       run: pnpm build:safari
+  #
+  #     - name: Publish to App Store Connect
+  #       uses: rxliuli/safari-webext-publish-action@main
+  #       with:
+  #         project-path: '.output/My Extension'
+  #         bundle-identifier: 'com.example.my-extension'
+  #         team-id: 'ABCDE12345'
+  #         app-signing-identity: '3rd Party Mac Developer Application: Your Name (ABCDE12345)'
+  #         installer-signing-identity: '3rd Party Mac Developer Installer: Your Name (ABCDE12345)'
+  #       env:
+  #         APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+  #         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+  #         APPLE_MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_MACOS_PROVISIONING_PROFILE_BASE64 }}
+  #         APPLE_MACOS_EXTENSION_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_MACOS_EXTENSION_PROVISIONING_PROFILE_BASE64 }}
+  #         APPLE_IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_IOS_PROVISIONING_PROFILE_BASE64 }}
+  #         APPLE_IOS_EXTENSION_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_IOS_EXTENSION_PROVISIONING_PROFILE_BASE64 }}
+  #         APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+  #         APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+  #         APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
