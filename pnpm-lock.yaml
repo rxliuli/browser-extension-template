@@ -6,7 +6,6 @@ settings:
 
 overrides:
   wxt>vite: ^8.0.0
-  publish-browser-extension: ^4.0.5
 
 importers:
 
