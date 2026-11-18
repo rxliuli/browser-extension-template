@@ -1,10 +1,8 @@
 # Browser Extension Template
 
-A modern browser extension development template built with React, Shadcn/ui, and WXT. Supports building cross-browser extensions compatible with Chrome, Edge, Firefox, and Safari (requires macOS).
+A browser extension template built with React, shadcn/ui, and WXT. Builds for Chrome, Edge, Firefox (desktop and Android), and Safari (requires macOS).
 
 ## Getting Started
-
-### Initialize Project
 
 ```sh
 git clone https://github.com/<your-github-username>/<your-project-name>.git
@@ -13,48 +11,59 @@ pnpm i
 pnpm init-project
 ```
 
-Follow the prompts to enter your project name and complete the initialization.
+Follow the prompts to enter your project name. Then fill in the `extport` section of `wxt.config.ts`.
+
+## What's included
+
+- **Popup**: a button that injects the in-page panel into the current tab.
+- **In-page panel**: a React UI in a shadow root, isolated from the page's styles, injected on demand with `activeTab` and `scripting`.
+- **Options page**: edits a setting the panel reads and watches.
+- **Background**: handles messages from content scripts.
+
+Installing shows no permission warning. The extension asks for `storage`, `activeTab`, and `scripting` only, has no host permissions, and declares no content scripts in its manifest.
+
+```
+entrypoints/
+  background.ts     message handlers
+  popup/            toolbar popup
+  options/          settings page
+  content/          in-page panel (runtime registered)
+lib/
+  settings.ts       storage items
+  message.ts        messaging protocol
+  panel.ts          injecting the panel
+assets/style.css    Tailwind and theme, shared by every UI
+tests/
+  unit/             pure logic and storage, with WXT's fake browser
+  e2e/              real Chromium with the built extension loaded
+```
 
 ## Development
 
-Chrome is used as the baseline version for development. Edge, Firefox, and Safari builds are only created when needed for publishing, testing, or debugging platform-specific issues.
-
-### Start Development Server
-
 ```sh
-pnpm dev
+pnpm dev          # Chrome, output in .output/chrome-mv3-dev
+pnpm compile      # type check
+pnpm test:unit
+pnpm test:e2e
 ```
 
-After running the development server:
+To load the dev build, open `chrome://extensions`, enable Developer mode, and load `.output/chrome-mv3-dev`.
 
-1. Navigate to the `*.output/chrome-mv3-dev` directory to find the compiled extension files
-2. Open `chrome://extensions` in Chrome
-3. Enable "Developer mode"
-4. Drag and drop the output directory to load the extension for debugging
+The end-to-end tests build a test variant (`pnpm build:e2e`) that is granted every site in its manifest, because a test cannot click the toolbar button or a permission prompt. They need Playwright's Chromium: `pnpm exec playwright install chromium`.
 
-## Build & Package
-
-### Chrome, Edge, and Firefox
-
-Generate production builds and create zip files for distribution:
+## Build
 
 ```sh
 pnpm zip && pnpm zip:firefox
+pnpm build:safari   # macOS with Xcode
 ```
 
-### Safari
+For Safari, fill in the `safari` section of `wxt.config.ts`, then build and test the generated Xcode project. Keep the Safari app name plain; see the comment in `wxt.config.ts`.
 
-Safari extension requires macOS environment and Xcode for building and publishing.
-
-#### Build Steps
-
-1. Update `developmentTeam` in `wxt.config.ts` with your Apple Developer Team ID
-2. Run `pnpm build:safari` - this will automatically build and open Xcode
-3. Build the project in Xcode and test in Safari
-4. To publish: In Xcode, select **Product → Archive** to submit to the App Store
+Releases are published by `.github/workflows/release.yaml` when the version in `package.json` changes.
 
 ## Requirements
 
 - Node.js (latest LTS recommended)
-- pnpm package manager
-- macOS with Xcode (for Safari development only)
+- pnpm
+- macOS with Xcode (for Safari only)

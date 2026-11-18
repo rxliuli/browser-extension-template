@@ -1,4 +1,4 @@
-import { defineConfig, UserManifest } from 'wxt'
+import { defineConfig, type UserManifest } from 'wxt'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
@@ -15,6 +15,10 @@ export default defineConfig({
     //   appCategory: 'public.app-category.productivity',
     //   bundleIdentifier: 'com.example.your-extension',
     //   developmentTeam: 'YOUR_TEAM_ID',
+    //   // App Store Connect API key, used to upload builds.
+    //   issuerId: 'YOUR_ISSUER_ID',
+    //   keyId: 'YOUR_KEY_ID',
+    //   openProject: true,
     // },
   },
   vite: () => ({
@@ -29,8 +33,12 @@ export default defineConfig({
       name: 'Browser Extension Template',
       description:
         'A template for WXT, a WebExtension framework based on Vite and React',
-      permissions: ['storage'],
-      host_permissions: ['<all_urls>'],
+      // No host permissions: installing shows no permission warning.
+      // `activeTab` grants the current tab when the user clicks the toolbar
+      // button, which is enough for `scripting` to inject the panel. If a
+      // feature needs specific sites, declare them in
+      // `optional_host_permissions` and request them from a click.
+      permissions: ['storage', 'activeTab', 'scripting'],
       author: {
         email: 'rxliuli@gmail.com',
       },
@@ -44,6 +52,11 @@ export default defineConfig({
         },
       },
       homepage_url: 'https://rxliuli.com/project/browser-extension-template',
+    }
+    if (env.mode === 'e2e') {
+      // Tests cannot click the toolbar button or a permission prompt, so the
+      // test build (`wxt build --mode e2e`) is granted every site up front.
+      manifest.host_permissions = ['<all_urls>']
     }
     if (env.browser === 'firefox') {
       manifest.browser_specific_settings = {
@@ -63,6 +76,12 @@ export default defineConfig({
       // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/author
       // @ts-expect-error
       manifest.author = 'rxliuli'
+    }
+    if (env.browser === 'safari') {
+      // The name becomes the generated app's name and bundle paths. Keep it
+      // plain (no dashes or subtitles): under a long name Safari loaded none
+      // of the extension's resources.
+      manifest.name = 'Browser Extension Template'
     }
     return manifest
   },

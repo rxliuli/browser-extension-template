@@ -1,5 +1,7 @@
 import { defineExtensionMessaging } from '@webext-core/messaging'
 
-export const messager = defineExtensionMessaging<{
-  show(): void
+/** Requests sent from content scripts and pages to the background. */
+export const { sendMessage, onMessage } = defineExtensionMessaging<{
+  // Content scripts cannot call `runtime.openOptionsPage()` themselves.
+  openOptions(): void
 }>()

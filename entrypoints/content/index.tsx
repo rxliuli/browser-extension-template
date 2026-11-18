@@ -1,40 +1,51 @@
 import ReactDOM from 'react-dom/client'
 import { App } from './App.tsx'
-import styles from './style.css?inline'
-import styles2 from 'sonner/dist/styles.css?inline'
+import styles from '@/assets/style.css?inline'
+import sonnerStyles from 'sonner/dist/styles.css?inline'
 import { addStyle } from '@/lib/addStyle.ts'
 
+const TAG = 'extension-panel'
+
 export default defineContentScript({
-  matches: ['<all_urls>'],
-  cssInjectionMode: 'ui',
+  // Injected on demand by `showPanel` (lib/panel.ts) rather than declared in
+  // the manifest. Giving it `matches` would add them to host_permissions.
+  registration: 'runtime',
+  // Styles are inlined into the shadow root by `addStyle` below.
+  cssInjectionMode: 'manual',
 
   async main(ctx) {
-    const ui = await createShadowRootUi(ctx, {
-      name: 'example-ui',
-      position: 'modal',
-      anchor: 'body',
-      onMount: (container) => {
-        const shadowEl = document.querySelector('example-ui') as HTMLElement
-        const shadow = shadowEl!.shadowRoot!
-        shadowEl.style.zIndex = '9999'
-        addStyle(shadow, [styles, styles2])
+    // Every injection runs `main` again, and starting a new context removes
+    // the previous one's UI before this point. The isolated world's globals
+    // survive between injections, so a flag tells whether the panel was open:
+    // a second click closes it.
+    const state = globalThis as { __panelOpen?: boolean }
+    if (state.__panelOpen) {
+      state.__panelOpen = false
+      return
+    }
 
-        // Container is a body, and React warns when creating a root on the body, so create a wrapper div
+    const ui = await createShadowRootUi(ctx, {
+      name: TAG,
+      // The panel positions itself (`fixed` in Panel.tsx). 'modal' would
+      // cover the whole page and block clicks on it.
+      position: 'inline',
+      anchor: 'body',
+      onMount: (container, shadow) => {
+        addStyle(shadow, [styles, sonnerStyles])
+        // React warns about rendering into <body>, so use a wrapper.
         const app = document.createElement('div')
         container.append(app)
-
-        // Create a root on the UI container and render a component
         const root = ReactDOM.createRoot(app)
-        root.render(<App container={container} />)
+        root.render(<App container={container} onClose={close} />)
         return root
       },
-      onRemove: (root) => {
-        // Unmount the root when the UI is removed
-        root?.unmount()
-      },
+      onRemove: (root) => root?.unmount(),
     })
-
-    // 4. Mount the UI
+    const close = () => {
+      state.__panelOpen = false
+      ui.remove()
+    }
     ui.mount()
+    state.__panelOpen = true
   },
 })

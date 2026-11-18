@@ -1,15 +1,12 @@
 import { ShadowProvider } from '@/integrations/shadow/ShadowProvider'
-import { ThemeProvider } from '@/integrations/theme/ThemeProvider'
 import { Toaster } from 'sonner'
-import { IndexPage } from './pages/IndexPage'
+import { Panel } from './Panel'
 
-export function App(props: { container: HTMLElement }) {
+export function App(props: { container: HTMLElement; onClose(): void }) {
   return (
     <ShadowProvider container={props.container}>
-      <ThemeProvider>
-        <Toaster richColors={true} closeButton={true} />
-        <IndexPage />
-      </ThemeProvider>
+      <Toaster richColors={true} closeButton={true} theme="system" />
+      <Panel onClose={props.onClose} />
     </ShadowProvider>
   )
 }

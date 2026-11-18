@@ -1,32 +1,28 @@
 import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import { playwright } from '@vitest/browser-playwright'
+import { WxtVitest } from 'wxt/testing/vitest-plugin'
 
 export default defineConfig({
   test: {
     projects: [
       {
-        plugins: [react()],
-        resolve: {
-          tsconfigPaths: true,
-        },
+        // Pure logic and storage, with WXT's in-memory fake of `browser.*`.
+        plugins: [WxtVitest()],
         test: {
-          exclude: ['**/*.unit.test.ts', 'node_modules/**'],
-          browser: {
-            provider: playwright(),
-            enabled: true,
-            // https://vitest.dev/guide/browser/playwright
-            instances: [{ browser: 'chromium', headless: true }],
-          },
+          name: 'unit',
+          include: ['tests/unit/**/*.test.ts'],
+          mockReset: true,
+          restoreMocks: true,
         },
       },
       {
-        resolve: {
-          tsconfigPaths: true,
-        },
+        // Real Chromium with the built extension loaded.
         test: {
-          include: ['**/*.unit.test.ts'],
-          exclude: ['*.test.ts', 'node_modules/**'],
+          name: 'e2e',
+          include: ['tests/e2e/**/*.test.ts'],
+          globalSetup: ['tests/e2e/global-setup.ts'],
+          testTimeout: 30_000,
+          hookTimeout: 60_000,
+          fileParallelism: false,
         },
       },
     ],
